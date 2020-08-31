@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 
 namespace TimeStamp {
     class Program {
         static void Main(string[] args) {
+            Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
+
             bool TimeStampNewlines = false;
             bool UseLocalTimeZone = false;
 
@@ -14,7 +17,7 @@ namespace TimeStamp {
 
             // handle parameters
             foreach ( string arg in args ) {
-                string argLower = arg.ToLower();
+                string argLower = arg.ToUpper(CultureInfo.InvariantCulture);
                 if ( ProcessCMDoption_bool(OptionStrings_TimeStampNewlines, argLower) ) {
                     TimeStampNewlines = true;
                 } else if ( ProcessCMDoption_bool(OptionStrings_LocalTimeZone, argLower) ) {
@@ -71,7 +74,7 @@ namespace TimeStamp {
                 // Program was called with a pipe input
                 string s;
                 while ( (s = Console.ReadLine()) != null ) {
-                    if ( TimeStampNewlines || s != "" ) {
+                    if ( TimeStampNewlines || s.Length != 0 ) {
                         PrintTimeStamp(" - ");
                     }
                     Console.WriteLine(s);
@@ -107,12 +110,16 @@ namespace TimeStamp {
             }
         }
 
+        protected static void ExitHandler(object sender, ConsoleCancelEventArgs e) {
+            e.Cancel = true;
+        }
+
         /* Compares argLower (a lowercase string) to all elements of the Array OptionStrings. 
          * If a match is found, returns true, else returns false.
          */
         private static bool ProcessCMDoption_bool(string[] OptionStrings, string argLower) {
             foreach ( string possibleArg in OptionStrings ) {
-                if ( argLower == possibleArg.ToLower() ) {
+                if ( argLower == possibleArg.ToUpper(CultureInfo.InvariantCulture) ) {
                     return true;
                 }
             }
