@@ -42,7 +42,7 @@ namespace TimeStamp {
                         string temp = new string(' ', max - switches.Length + 3);
                         switches.Append(temp);
                     }
-                    SwitchesHelp[0].Append("Will print a Timestamp with no text after it whenever an empt line arrives.");
+                    SwitchesHelp[0].Append("Will print a Timestamp with no text after it whenever an empty line arrives.");
                     SwitchesHelp[1].Append("Will use your local Timezone to generate a Timestamp instead of UTC. \n" +
                         "Warning: Local timezones may be subject to adjustments due to \"Daylight Savings\" Time or similar.");
 
@@ -88,11 +88,26 @@ namespace TimeStamp {
              * Does not add a newline.
              */
             void PrintTimeStamp(string postFix) {
+                string[] temp;
                 if ( UseLocalTimeZone ) {
-                    Console.Write(DateTime.Now.ToString("u", System.Globalization.CultureInfo.InvariantCulture) + postFix);
+                    // "u" option actually seems to ignore the IFormatProvider you supply. It is here anyway to make a warning go away.
+                    temp = DateTime.Now.ToString("u", System.Globalization.CultureInfo.InvariantCulture).TrimEnd('Z').Split(' ', 2);
                 } else {
-                    Console.Write(DateTime.UtcNow.ToString("u", System.Globalization.CultureInfo.InvariantCulture) + postFix);
+                    // see above
+                    temp = DateTime.UtcNow.ToString("u", System.Globalization.CultureInfo.InvariantCulture).Split(' ', 2);
                 }
+                if ( temp.Length != 2 ) {
+                    throw new Exception("unexpected Format");
+                }
+                Console.Write('[');
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.ForegroundColor = ConsoleColor.Blue;
+                Console.Write(temp[0] + ' ');
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write(temp[1]);
+
+                Console.ResetColor();
+                Console.Write(']' + postFix);
             }
 
             /* Concats the strings from an array EXCEPT the first one, separated by a ", "
