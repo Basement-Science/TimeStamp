@@ -13,62 +13,75 @@ namespace TimeStamp {
 
             bool TimeStampNewlines = false;
             bool UseLocalTimeZone = false;
+            bool FullColor = false;
 
             string[] OptionStrings_TimeStampNewlines = { "/n", "-n", "--stampNewLines" };
             string[] OptionStrings_LocalTimeZone = { "/l", "-l", "--localTime" };
+            string[] OptionStrings_FullColor = { "/c", "-c", "--fullColor" };
 
             // handle parameters
             foreach ( string arg in args ) {
-                string argLower = arg.ToUpper(CultureInfo.InvariantCulture);
-                if ( ProcessCMDoption_bool(OptionStrings_TimeStampNewlines, argLower) ) {
+                string argUpper = arg.ToUpper(CultureInfo.InvariantCulture);
+                if ( ProcessCMDoption_bool(OptionStrings_TimeStampNewlines, argUpper) ) {
                     TimeStampNewlines = true;
-                } else if ( ProcessCMDoption_bool(OptionStrings_LocalTimeZone, argLower) ) {
+                } else if ( ProcessCMDoption_bool(OptionStrings_LocalTimeZone, argUpper) ) {
                     UseLocalTimeZone = true;
+                } else if ( ProcessCMDoption_bool(OptionStrings_FullColor, argUpper) ) {
+                    FullColor = true;
                 } else {
-                    // print help
-                    string ProgramName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
-                    Console.WriteLine(ProgramName + " utility - Adds a Timestamp to the beginning of each line from the pipe |");
-
-                    // Prepare to print the help for option switches
-                    List<StringBuilder> SwitchesHelp = new List<StringBuilder> {
-                        ConcatSwitchesHelp(OptionStrings_TimeStampNewlines),
-                        ConcatSwitchesHelp(OptionStrings_LocalTimeZone)
-                    };
-
-                    // calculate maximum length of switches
-                    int max = 0;
-                    foreach ( var switches in SwitchesHelp ) {
-                        max = switches.Length > max ? switches.Length : max;
-                    }
-                    foreach ( var switches in SwitchesHelp ) {
-                        string temp = new string(' ', max - switches.Length + 3);
-                        switches.Append(temp);
-                    }
-                    SwitchesHelp[0].Append("Will print a Timestamp with no text after it whenever an empty line arrives.");
-                    SwitchesHelp[1].Append("Will use your local Timezone to generate a Timestamp instead of UTC. \n" +
-                        "Warning: Local timezones may be subject to adjustments due to \"Daylight Savings\" Time or similar.");
-
-                    Console.WriteLine("Options:");
-                    foreach ( var HelpText in SwitchesHelp ) {
-                        Console.WriteLine(HelpText);
-                    }
-
-                    // Print Example Usage
-                    Console.WriteLine("");
-                    string exampleCommand = "ping -n 3 localhost | ";
-                    Console.WriteLine("Example usage: '" + exampleCommand + System.Diagnostics.Process.GetCurrentProcess().ProcessName + "' ");
-                    Console.WriteLine("Running example ...");
-                    // actually run the example command
-                    Process p = new Process();
-                    p.StartInfo.FileName = "cmd";
-                    p.StartInfo.Arguments = "/C " + exampleCommand +
-                        "\"" + System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName + "\"";
-                    p.Start();
-                    p.WaitForExit();
-                    p.Close();
+                    printHelpScreen();
                     return;
                 }
+            }
 
+            void printHelpScreen() {
+                // print help
+                string ProgramName = System.Diagnostics.Process.GetCurrentProcess().ProcessName;
+                Console.WriteLine(ProgramName + " utility - Adds a Timestamp to the beginning of each line from the pipe |");
+
+                // Prepare to print the help for option switches
+                List<StringBuilder> SwitchesHelp = new List<StringBuilder> {
+                        ConcatSwitchesHelp(OptionStrings_TimeStampNewlines),
+                        ConcatSwitchesHelp(OptionStrings_LocalTimeZone),
+                        ConcatSwitchesHelp(OptionStrings_FullColor)
+                    };
+
+                // calculate maximum length of switches
+                int max = 0;
+                foreach ( var switches in SwitchesHelp ) {
+                    max = switches.Length > max ? switches.Length : max;
+                }
+                foreach ( var switches in SwitchesHelp ) {
+                    string temp = new string(' ', max - switches.Length + 3);
+                    switches.Append(temp);
+                }
+                SwitchesHelp[0].Append("Will print a Timestamp with no text after it whenever an empty line arrives.");
+                SwitchesHelp[1].Append("Will use your local Timezone to generate a Timestamp instead of UTC. \n" +
+                    "Warning: Local timezones may be subject to adjustments due to \"Daylight Savings\" Time or similar.");
+                SwitchesHelp[2].Append("Enable full ANSI code color support. May not be compatible with all other console applications, " +
+                    "especially when piping " + ProgramName + "'s output into other applications. \n");
+
+                // Actually print SwitchesHelp. 
+                Console.WriteLine("Options:");
+                foreach ( var HelpText in SwitchesHelp ) {
+                    Console.WriteLine(HelpText);
+                }
+
+                // Print Example Usage
+                Console.WriteLine("");
+                string exampleCommand = "ping -n 3 localhost | ";
+                string TS_exampleSwitches = " -c";
+                Console.WriteLine("Example usage: '" + exampleCommand + System.Diagnostics.Process.GetCurrentProcess().ProcessName
+                    + TS_exampleSwitches + "' ");
+                Console.WriteLine("Running example ...");
+                // actually run the example command
+                Process p = new Process();
+                p.StartInfo.FileName = "cmd";
+                p.StartInfo.Arguments = "/C " + exampleCommand +
+                    "\"" + System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName + "\"" + TS_exampleSwitches;
+                p.Start();
+                p.WaitForExit();
+                p.Close();
             }
 
             // handle the input
@@ -97,13 +110,24 @@ namespace TimeStamp {
                 } else {
                     // see above
                     temp = DateTime.UtcNow.ToString("u", System.Globalization.CultureInfo.InvariantCulture).TrimEnd('Z').Split(' ', 2);
-                    temp[1] += ("Z").Pastel("#808080");
+                    temp[1] += FullColor ? "Z".Pastel("#808080") : "Z";
                 }
                 Console.Write('[');
+
+                ConsoleColor oldBackground = Console.BackgroundColor;
                 Console.BackgroundColor = ConsoleColor.Black;
-                Console.Write(temp[0].Pastel("#FF7800") + ' ');
-                Console.Write(temp[1].Pastel("#FF3500"));
-                Console.ResetColor();
+                ConsoleColor oldForeground = Console.ForegroundColor;
+                Console.ForegroundColor = ConsoleColor.Blue;
+                if ( FullColor ) {
+                    Console.Write(temp[0].Pastel("#FF7800") + ' ');
+                    Console.Write(temp[1].Pastel("#FF3500"));
+                } else {
+                    Console.Write(temp[0] + ' ');
+                    Console.Write(temp[1]);
+                }
+                Console.ForegroundColor = oldForeground;
+                Console.BackgroundColor = oldBackground;
+
                 Console.Write(']' + postFix);
             }
 
