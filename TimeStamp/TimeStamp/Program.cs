@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
+using Pastel;
 
 namespace TimeStamp {
     class Program {
@@ -101,10 +102,8 @@ namespace TimeStamp {
                 }
                 Console.Write('[');
                 Console.BackgroundColor = ConsoleColor.Black;
-                Console.ForegroundColor = ConsoleColor.Blue;
-                Console.Write(temp[0] + ' ');
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write(temp[1]);
+                Console.Write(temp[0].Pastel("#FF7800") + ' ');
+                Console.Write(temp[1].Pastel("#FF4800"));
 
                 Console.ResetColor();
                 Console.Write(']' + postFix);
