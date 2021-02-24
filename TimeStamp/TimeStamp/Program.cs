@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using Pastel;
 
@@ -95,16 +96,13 @@ namespace TimeStamp {
                     temp = DateTime.Now.ToString("u", System.Globalization.CultureInfo.InvariantCulture).TrimEnd('Z').Split(' ', 2);
                 } else {
                     // see above
-                    temp = DateTime.UtcNow.ToString("u", System.Globalization.CultureInfo.InvariantCulture).Split(' ', 2);
-                }
-                if ( temp.Length != 2 ) {
-                    throw new Exception("unexpected Format");
+                    temp = DateTime.UtcNow.ToString("u", System.Globalization.CultureInfo.InvariantCulture).TrimEnd('Z').Split(' ', 2);
+                    temp[1] += ("Z").Pastel("#808080");
                 }
                 Console.Write('[');
                 Console.BackgroundColor = ConsoleColor.Black;
                 Console.Write(temp[0].Pastel("#FF7800") + ' ');
-                Console.Write(temp[1].Pastel("#FF4800"));
-
+                Console.Write(temp[1].Pastel("#FF3500"));
                 Console.ResetColor();
                 Console.Write(']' + postFix);
             }
