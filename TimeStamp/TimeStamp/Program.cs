@@ -82,29 +82,35 @@ namespace TimeStamp {
                 string output;
 
                 Console.Write('[');
-                if (ColorMode >= 2) {
-                    builder = new StringBuilder(stamp[0].Pastel(colorPalette.DateColor))
-                        .Append(stamp[1].Pastel(colorPalette.TimeColor)).Append(end);
-                    output = builder.ToString().PastelBg(colorPalette.BGcolor);
-                    Console.Write(output);
-                } else {
-                    builder = new StringBuilder(stamp[0]).Append(stamp[1]).Append(end);
-                    output = builder.ToString();
-                    if (ColorMode == 1) {
-                        // Use oldschool color
-                        ConsoleColor oldBackground = Console.BackgroundColor;
-                        Console.BackgroundColor = ConsoleColor.Black;
-                        ConsoleColor oldForeground = Console.ForegroundColor;
-                        Console.ForegroundColor = ConsoleColor.Blue;
+                if (ColorMode >= 1) {
+                    ConsoleColor oldBackground = Console.BackgroundColor;
+                    ConsoleColor oldForeground = Console.ForegroundColor;
+                    if (ColorMode >= 2) {
+                        builder = new StringBuilder(stamp[0].Pastel(colorPalette.DateColor))
+                            .Append(stamp[1].Pastel(colorPalette.TimeColor)).Append(end);
+                        output = builder.ToString().PastelBg(colorPalette.BGcolor);
                         Console.Write(output);
-                        Console.ForegroundColor = oldForeground;
-                        Console.BackgroundColor = oldBackground;
                     } else {
-                        // No color
-                        Console.Write(output);
+                        // Use oldschool color
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.Blue;
+
+                        PrintSimpleTimeStamp();
                     }
+                    Console.ForegroundColor = oldForeground;
+                    Console.BackgroundColor = oldBackground;
+                } else {
+                    // No color
+                    PrintSimpleTimeStamp();
                 }
                 Console.Write(']' + postFix);
+
+                // puts together and prints the Timestamp without any ANSI codes
+                void PrintSimpleTimeStamp() {
+                    builder = new StringBuilder(stamp[0]).Append(stamp[1]).Append(end);
+                    output = builder.ToString();
+                    Console.Write(output);
+                }
             }
         }
 
