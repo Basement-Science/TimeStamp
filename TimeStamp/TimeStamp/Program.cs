@@ -83,6 +83,7 @@ namespace TimeStamp {
 
                 Console.Write('[');
                 if (ColorMode >= 1) {
+                    // store colors before Timestamp
                     ConsoleColor oldBackground = Console.BackgroundColor;
                     ConsoleColor oldForeground = Console.ForegroundColor;
                     if (ColorMode >= 2) {
@@ -97,6 +98,7 @@ namespace TimeStamp {
 
                         PrintSimpleTimeStamp();
                     }
+                    // restore previous colors
                     Console.ForegroundColor = oldForeground;
                     Console.BackgroundColor = oldBackground;
                 } else {
