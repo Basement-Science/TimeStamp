@@ -2,7 +2,7 @@
   "profiles": {
     "TimeStamp": {
       "commandName": "Project",
-      "commandLineArgs": "-c"
+      "commandLineArgs": "-c 2"
     }
   }
 }
