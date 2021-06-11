@@ -2,7 +2,8 @@
   "profiles": {
     "TimeStamp": {
       "commandName": "Project",
-      "commandLineArgs": "-c 2"
+      "commandLineArgs": "-c 2 -o testFile.txt",
+      "nativeDebugging": true
     }
   }
 }
