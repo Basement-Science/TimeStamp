@@ -10,6 +10,10 @@ using System.CommandLine.Builder;
 using System.CommandLine.Parsing;
 using System.CommandLine.Help;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Linq;
+using System.Collections.Immutable;
 
 namespace TimeStamp {
     class Program {
@@ -18,6 +22,8 @@ namespace TimeStamp {
 
         private static RootCommand rootCommand;
         private static Option opt_local, opt_TimestampNewlines, opt_allowRedirectingANSIcolor, opt_ColorMode, opt_OutputFile;
+
+        private static bool ranMainProgram = false;
 
         public static async Task<int> Main(string[] args) {
             rootCommand = new RootCommand(description: "Adds TimeStamps to the beginning of each Line from the Pipe |");
@@ -64,11 +70,86 @@ namespace TimeStamp {
 
             // listen to ctrl+c from now on
             Console.CancelKeyPress += new ConsoleCancelEventHandler(ExitHandler);
-            return await rootCommand.InvokeAsync(args);
+
+            // start the main program
+            int mainExecution = await rootCommand.InvokeAsync(args).ConfigureAwait(false);
+
+            if (! ranMainProgram) {
+                try {
+                    // define example command parameters
+                    const string exampleSwitches_TS = " -c 2";
+
+                    string exampleCommand;
+                    string exampleShell;
+                    string runCmdLineSwich;
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                        // windows always has cmd and ping command.
+                        exampleCommand = "ping -n 3 localhost | ";
+                        exampleShell = "cmd";
+                        runCmdLineSwich = "/c ";
+                    } else if ( // try to handle all UNIX systems
+                        RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ||
+                        RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
+                        RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD)) {
+                        // unix systems may have different shells and tools.
+                        List<string> candidates = new();
+                        foreach (string line in System.IO.File.ReadLines("/etc/shells")) {
+                            // check if the line is commented out
+                            if (line[line.TakeWhile(c => char.IsWhiteSpace(c)).Count()] == '#' ) {
+                                if (File.Exists(line)) {
+                                    candidates.Add(line);
+                                } else {
+                                    Console.WriteLine(line + "does not exist!");
+                                }
+                            } 
+                        }
+                        string shellToUse;
+                        var preferredShells = ImmutableArray.Create(new[] { "bash", "zsh", "sh"});
+                        foreach (string preferred in preferredShells) {
+                            foreach (string candidate in candidates) {
+                                if (candidate.Contains(preferred)) {
+                                    // found the best shell. Set it and exit from loops.
+                                    exampleShell = candidate;
+                                    goto foundShell;
+                                } 
+                            }
+                        }
+                        // didnt find a preferred shell. Try the first one and hope for the best.
+                        exampleShell = candidates.First();
+                        foundShell:
+
+                        exampleCommand = "ping -c 3 localhost | ";
+                        runCmdLineSwich = "-c ";
+                    } else {
+                        throw new NotSupportedException("unsupported Operating System.");
+                    }
+
+                    // print FULL example command
+                    Console.WriteLine("Example usage: '" + exampleCommand + ProgramName
+                        + exampleSwitches_TS + "' ");
+                    Console.WriteLine("Running example using " + exampleShell + "...");
+
+                    // actually run the example command
+                    using (Process p = new Process()) {
+                        p.StartInfo.FileName = exampleShell;
+                        p.StartInfo.Arguments = runCmdLineSwich + exampleCommand +
+                            "\"" + System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName + "\"" + exampleSwitches_TS;
+                        p.Start();
+                        p.WaitForExit();
+                    }
+                } catch (NotSupportedException e) {
+                    Console.WriteLine(e.ToString() + " Will not attempt to run an Example command. Exiting...");
+                } catch (Exception e) {
+                    Console.WriteLine(e);
+                    Console.WriteLine("Something went wrong while trying to run an Example command. Exiting...");
+                }
+            }
+            return mainExecution;
         }
 
         /* Watches Standard Input (pipe) and starts printing */
         private static void handleInput(bool local, bool TimestampNewlines, bool allowRedirectingANSIcolor, int ColorMode, FileInfo OutputFile) {
+            ranMainProgram = true;
             bool UseLocalTimezone = local;
 
             /* Console.WriteLine($"UseLocalTimezone {UseLocalTimezone}, TimestampNewlines {TimestampNewlines}, " +
