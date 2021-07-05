@@ -44,14 +44,14 @@ namespace TimeStamp {
                 getDefaultValue: () => 1,
                 description: "Specify how Colors will be used.\n" +
                 "0 - do not use color and remove existing\n" +
-                "1 - use old 16-color mode.\n" +
+                "1 - use legacy 16-color mode.\n" +
                 "2 - use full RGB with 'ANSI codes'\n" +
                 "    may cause issues when output is forwarded to other programs");
 
             opt_OutputFile = new Option<FileInfo>(
                 aliases: new string[] { "--output-File", "-o", "/o" },
                 getDefaultValue: () => null,
-                description: "Specify path to a Text File. All output will be written " +
+                description: "(Optional) Specify path to a Text File. All output will be written " +
                 "to this file IN ADDITION to standard output (console)\n" +
                 "Similar to the linux command 'tee'");
 
