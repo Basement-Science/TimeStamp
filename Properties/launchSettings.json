@@ -2,8 +2,7 @@
   "profiles": {
     "TimeStamp": {
       "commandName": "Project",
-      "commandLineArgs": "-x",
-      "nativeDebugging": true
+      "commandLineArgs": "-x"
     },
     "WSL 2": {
       "commandName": "WSL2",

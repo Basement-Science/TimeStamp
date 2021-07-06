@@ -135,7 +135,7 @@ namespace TimeStamp {
                         Console.WriteLine("Running example using " + p.StartInfo.FileName + " ...");
                         // actually run the example command
 
-                        Console.WriteLine(p.StartInfo.Arguments);
+                        //Console.WriteLine(p.StartInfo.Arguments);
                         p.Start();
                         p.WaitForExit();
                     }
