@@ -3,6 +3,8 @@ A cross-platform .NET 6 CLI utility that adds (colored) Timestamps to each line 
 
 _NOTE: Only Win-x64 builds are reasonably well tested._
 
+![HelpScreen](/auxFiles/HelpScreen.PNG "HelpScreen")
+
 ## Features:
 - local or UTC timezone selectable.
 - 3 color modes: none, legacy, ANSI (full RGB)
