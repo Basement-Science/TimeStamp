@@ -4,6 +4,11 @@
       "commandName": "Project",
       "commandLineArgs": "-x",
       "nativeDebugging": true
+    },
+    "WSL 2": {
+      "commandName": "WSL2",
+      "environmentVariables": {},
+      "distributionName": ""
     }
   }
 }
